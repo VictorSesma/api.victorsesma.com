@@ -87,7 +87,7 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	}
 	http.Redirect(w, req, target,
 		// see @andreiavrammsd comment: often 307 > 301
-		http.StatusPermanentRedirect)
+		http.StatusTemporaryRedirect)
 }
 
 func main() {
