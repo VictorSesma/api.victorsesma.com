@@ -3,11 +3,38 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"strings"
 )
 
-func blogpost() string {
-	return "blogpost :)"
+// Configuration holds the app configuration file
+type Configuration struct {
+	APISecret string `json:"ApiSecret"`
+	Ssl       struct {
+		Status    string `json:"Status"`
+		Privkey   string `json:"Privkey"`
+		Fullchain string `json:"Fullchain"`
+		HTTPSPort string `json:"HTTPSPort"`
+	} `json:"Ssl"`
+	HTTPPort string `json:"HTTPPort"`
+}
+
+func configuration() Configuration {
+	file, _ := os.Open("conf.json")
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	configuration := Configuration{}
+	err := decoder.Decode(&configuration)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	// fmt.Println(configuration)
+	// Adding semicolons
+	configuration.HTTPPort = ":" + configuration.HTTPPort
+	configuration.Ssl.HTTPSPort = ":" + configuration.Ssl.HTTPSPort
+	return configuration
 }
 
 // LifeEvent Blog Life Event structure
@@ -18,6 +45,10 @@ type LifeEvent struct {
 	Name        string
 	Summary     string
 	Description string
+}
+
+func blogpost() string {
+	return "blogpost :)"
 }
 
 func indeHandler(w http.ResponseWriter, r *http.Request) {
@@ -43,9 +74,30 @@ func blogHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "yeah")
 }
 
+func redirect(w http.ResponseWriter, req *http.Request) {
+	// remove/add not default ports from req.Host
+	Configuration := configuration()
+	target := "https://"
+	if Configuration.Ssl.HTTPSPort != "443" {
+		target = target + strings.Replace(req.Host, Configuration.HTTPPort, Configuration.Ssl.HTTPSPort, -1)
+	}
+	target = target + req.URL.Path
+	if len(req.URL.RawQuery) > 0 {
+		target += "?" + req.URL.RawQuery
+	}
+	http.Redirect(w, req, target,
+		// see @andreiavrammsd comment: often 307 > 301
+		http.StatusPermanentRedirect)
+}
+
 func main() {
 	http.HandleFunc("/", indeHandler)
 	http.HandleFunc("/cv/", cvHandler)
 	http.HandleFunc("/blog/", blogHandler)
-	http.ListenAndServe(":80", nil)
+	Configuration := configuration()
+	go http.ListenAndServe(Configuration.HTTPPort, http.HandlerFunc(redirect))
+	err := http.ListenAndServeTLS(Configuration.Ssl.HTTPSPort, Configuration.Ssl.Fullchain, Configuration.Ssl.Privkey, nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
 }

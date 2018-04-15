@@ -1,0 +1,10 @@
+{
+    "ApiSecret": "",
+    "Ssl": {
+        "Status":"on",
+        "Privkey":"",
+        "Fullchain":"",
+        "HTTPSPort":"443"
+    },
+    "HTTPPort": "80"
+}
