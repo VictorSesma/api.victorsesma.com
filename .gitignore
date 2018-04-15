@@ -1,2 +1,4 @@
 # Bin file is ignored. Create it using "go build"
 api.victorsesma.com
+# Ignoring config file
+conf.json

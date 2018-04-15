@@ -1,5 +1,5 @@
 # Welcome to <a href="https://victorsesma.com">VictorSesma.com</a> Go Repository
-This is the API end point for the <a href="https://victorsesma.com">VictorSesma.com</a> <a href="https://github.com/leviatan89/victorsesma.com">React App</a>
+This is the API end point for the <a href="https://victorsesma.com" target="_blank">VictorSesma.com</a> <a href="https://github.com/leviatan89/victorsesma.com" target="_blank">React App</a>
 ## How to Deploy
 1. Install Golang
 2. Clone the repository
