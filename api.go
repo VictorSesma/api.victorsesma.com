@@ -47,5 +47,5 @@ func main() {
 	http.HandleFunc("/", indeHandler)
 	http.HandleFunc("/cv/", cvHandler)
 	http.HandleFunc("/blog/", blogHandler)
-	http.ListenAndServe(":8000", nil)
+	http.ListenAndServe(":80", nil)
 }
