@@ -6,7 +6,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"time"
+
+	"github.com/gocql/gocql"
 )
 
 // Configuration holds the app configuration file
@@ -18,6 +22,14 @@ type Configuration struct {
 		Fullchain string `json:"Fullchain"`
 		HTTPSPort string `json:"HTTPSPort"`
 	} `json:"Ssl"`
+	Database struct {
+		Cassandra struct {
+			UserName      string `json:"UserName"`
+			Secret        string `json:"Secret"`
+			ServerAddress string `json:"ServerAddress"`
+			Namespace     string `json:"Namespace"`
+		} `json:"Cassandra"`
+	} `json:"Database"`
 	HTTPPort string `json:"HTTPPort"`
 }
 
@@ -40,8 +52,8 @@ func configuration() Configuration {
 // LifeEvent Blog Life Event structure
 type LifeEvent struct {
 	ShownOrder  string
-	StartDate   string
-	EndDate     string
+	StartDate   time.Time
+	EndDate     time.Time
 	Name        string
 	Summary     string
 	Description string
@@ -52,12 +64,28 @@ func blogpost() string {
 }
 
 func indeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Whoa, Go is neat!")
+	fmt.Fprintf(w, "The API is up and running. Visit https://victorsesma.com/ from the browser.")
 }
 func cvHandler(w http.ResponseWriter, r *http.Request) {
+	Configuration := configuration()
+	cluster := gocql.NewCluster(Configuration.Database.Cassandra.ServerAddress)
+	cluster.Keyspace = Configuration.Database.Cassandra.Namespace
+	cluster.Consistency = gocql.Quorum
+	session, _ := cluster.CreateSession()
+	defer session.Close()
+	iter := session.Query(`SELECT description, end_date, name, show_order, start_date, summary FROM api_victorsesma.curriculum_vitae;`).Iter()
+	var name, summary, description, showOrder string
+	var startDate, endDate time.Time
+	var counter = 1
 	LifeEvents := make(map[string]LifeEvent)
-	LifeEvents["0"] = LifeEvent{"0", "2016-06-05", "Current Job", "Full Stack Developer in SmarterClick.com", "PHP, JavaScript, CSS, HTML", "Full Stack Developer in SmarterClick.com. Building all the back-end and front-end internal systems."}
-	LifeEvents["1"] = LifeEvent{"1", "2015-05-05", "2016-06-01", "Intern in WatchFit.com", "IT Intern in WatchFit.com", "I did task of project management and developer, assisting to the CTO."}
+	for iter.Scan(&description, &endDate, &name, &showOrder, &startDate, &summary) {
+		//fmt.Println(w, name)
+		LifeEvents[strconv.Itoa(counter)] = LifeEvent{showOrder, startDate, endDate, name, summary, description}
+		counter++
+	}
+	if err := iter.Close(); err != nil {
+		log.Fatal(err)
+	}
 	js, err := json.Marshal(LifeEvents)
 	// fmt.Println(aLifeEvent)
 	if err != nil {

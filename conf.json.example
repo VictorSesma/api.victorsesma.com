@@ -1,10 +1,17 @@
 {
-    "ApiSecret": "",
     "Ssl": {
         "Status":"on",
         "Privkey":"",
         "Fullchain":"",
         "HTTPSPort":"443"
     },
-    "HTTPPort": "80"
+    "HTTPPort": "80",
+    "Database": {
+        "Cassandra": {
+            "UserName": "",
+            "Secret": "",
+            "ServerAddress": "",
+            "Namespace":""
+        }
+    }
 }
