@@ -16,4 +16,5 @@ VALUES
     'PHP, JavaScript, CSS, HTML',
     'Full Stack Developer in SmarterClick.com. Building all the back-end and front-end internal systems.',
     1
-);RIMARY KEY(id));```
+);RIMARY KEY(id));
+```
