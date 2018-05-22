@@ -71,6 +71,10 @@ func cvHandler(w http.ResponseWriter, r *http.Request) {
 	cluster := gocql.NewCluster(Configuration.Database.Cassandra.ServerAddress)
 	cluster.Keyspace = Configuration.Database.Cassandra.Namespace
 	cluster.Consistency = gocql.Quorum
+	cluster.Authenticator = gocql.PasswordAuthenticator{
+		Username: Configuration.Database.Cassandra.UserName,
+		Password: Configuration.Database.Cassandra.Secret,
+	}
 	session, _ := cluster.CreateSession()
 	defer session.Close()
 	iter := session.Query(`SELECT description, end_date, name, show_order, start_date, summary FROM api_victorsesma.curriculum_vitae;`).Iter()
