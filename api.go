@@ -84,8 +84,8 @@ func cvHandler(w http.ResponseWriter, r *http.Request) {
 	LifeEvents := make(map[string]LifeEvent)
 	for iter.Scan(&description, &endDate, &name, &showOrder, &startDate, &summary) {
 		//fmt.Println(w, name)
-		startDateFormated := startDate.Format("2006/01")
-		endDateFormated := endDate.Format("2006/01")
+		startDateFormated := startDate.Format("01/2006")
+		endDateFormated := endDate.Format("01/2006")
 		LifeEvents[strconv.Itoa(counter)] = LifeEvent{showOrder, startDateFormated, endDateFormated, name, summary, description}
 		counter++
 	}
