@@ -52,8 +52,8 @@ func configuration() Configuration {
 // LifeEvent Blog Life Event structure
 type LifeEvent struct {
 	ShownOrder  string
-	StartDate   time.Time
-	EndDate     time.Time
+	StartDate   string
+	EndDate     string
 	Name        string
 	Summary     string
 	Description string
@@ -84,7 +84,9 @@ func cvHandler(w http.ResponseWriter, r *http.Request) {
 	LifeEvents := make(map[string]LifeEvent)
 	for iter.Scan(&description, &endDate, &name, &showOrder, &startDate, &summary) {
 		//fmt.Println(w, name)
-		LifeEvents[strconv.Itoa(counter)] = LifeEvent{showOrder, startDate, endDate, name, summary, description}
+		startDateFormated := startDate.Format("2006/01")
+		endDateFormated := endDate.Format("2006/01")
+		LifeEvents[strconv.Itoa(counter)] = LifeEvent{showOrder, startDateFormated, endDateFormated, name, summary, description}
 		counter++
 	}
 	if err := iter.Close(); err != nil {
