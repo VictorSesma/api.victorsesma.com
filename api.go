@@ -77,7 +77,12 @@ func cvHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	session, _ := cluster.CreateSession()
 	defer session.Close()
-	iter := session.Query(`SELECT description, end_date, name, show_order, start_date, summary FROM api_victorsesma.curriculum_vitae;`).Iter()
+	iter := session.Query(`
+		SELECT description, end_date, name, show_order, start_date, summary
+		FROM api_victorsesma.curriculum_vitae
+		WHERE section_type = 'work_experience'
+		ORDER BY show_order;
+	`).Iter()
 	var name, summary, description, showOrder string
 	var startDate, endDate time.Time
 	var counter = 1
