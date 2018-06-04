@@ -84,6 +84,7 @@ func cvHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE section_type = 'work_experience'
 		ORDER BY show_order;
 	`).Iter()
+	fmt.Printf("cvHandler DB query took %s", time.Since(start))
 	var name, summary, description, showOrder string
 	var startDate, endDate time.Time
 	var counter = 1
@@ -98,6 +99,7 @@ func cvHandler(w http.ResponseWriter, r *http.Request) {
 	if err := iter.Close(); err != nil {
 		log.Fatal(err)
 	}
+	fmt.Printf("cvHandler DB query iterations took %s", time.Since(start))
 	js, err := json.Marshal(LifeEvents)
 	// fmt.Println(aLifeEvent)
 	if err != nil {
@@ -107,8 +109,7 @@ func cvHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write(js)
-	elapsed := time.Since(start)
-	log.Printf("cvHandler took %s", elapsed)
+	fmt.Printf("cvHandler took %s", time.Since(start))
 	// fmt.Fprintf(w, ) prints to the browser
 }
 
