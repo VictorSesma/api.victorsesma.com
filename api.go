@@ -13,6 +13,8 @@ import (
 	"github.com/gocql/gocql"
 )
 
+var sessionCassandra, errCassandra = connectToCassandra()
+
 // Configuration holds the app configuration file
 type Configuration struct {
 	APISecret string `json:"ApiSecret"`
@@ -49,6 +51,22 @@ func configuration() Configuration {
 	return configuration
 }
 
+func connectToCassandra() (*gocql.Session, error) {
+	Configuration := configuration()
+	cluster := gocql.NewCluster(Configuration.Database.Cassandra.ServerAddress)
+	cluster.Keyspace = Configuration.Database.Cassandra.Namespace
+	cluster.Consistency = gocql.Quorum
+	cluster.Authenticator = gocql.PasswordAuthenticator{
+		Username: Configuration.Database.Cassandra.UserName,
+		Password: Configuration.Database.Cassandra.Secret,
+	}
+	session, err := cluster.CreateSession()
+	if err != nil {
+		panic(err)
+	}
+	return session, err
+}
+
 // LifeEvent Blog Life Event structure
 type LifeEvent struct {
 	ShownOrder  string
@@ -68,17 +86,7 @@ func indeHandler(w http.ResponseWriter, r *http.Request) {
 }
 func cvHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	Configuration := configuration()
-	cluster := gocql.NewCluster(Configuration.Database.Cassandra.ServerAddress)
-	cluster.Keyspace = Configuration.Database.Cassandra.Namespace
-	cluster.Consistency = gocql.Quorum
-	cluster.Authenticator = gocql.PasswordAuthenticator{
-		Username: Configuration.Database.Cassandra.UserName,
-		Password: Configuration.Database.Cassandra.Secret,
-	}
-	session, _ := cluster.CreateSession()
-	defer session.Close()
-	iter := session.Query(`
+	iter := sessionCassandra.Query(`
 		SELECT description, end_date, name, show_order, start_date, summary
 		FROM api_victorsesma.curriculum_vitae
 		WHERE section_type = 'work_experience'
