@@ -67,6 +67,7 @@ func indeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "The API is up and running. Visit https://victorsesma.com/ from the browser.")
 }
 func cvHandler(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	Configuration := configuration()
 	cluster := gocql.NewCluster(Configuration.Database.Cassandra.ServerAddress)
 	cluster.Keyspace = Configuration.Database.Cassandra.Namespace
@@ -106,6 +107,8 @@ func cvHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write(js)
+	elapsed := time.Since(start)
+	log.Printf("cvHandler took %s", elapsed)
 	// fmt.Fprintf(w, ) prints to the browser
 }
 
