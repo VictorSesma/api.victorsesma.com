@@ -17,3 +17,6 @@ ExecStart=/path/to/binary
 [Install]
 WantedBy=multi-user.target
 ```
+
+
+Inspired by [this article](https://kenyaappexperts.com/blog/how-to-deploy-golang-to-production-step-by-step/)
