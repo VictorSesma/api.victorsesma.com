@@ -8,6 +8,6 @@ This is the API end point for the [VictorSesma.com](https://victorsesma.com) [Re
 2. Clone the repository (for example: `git clone git@github.com:leviatan89/api.victorsesma.com.git`)
 3. Make a copy and configure conf.json
 4. Run `go build`
-5. Execute `sudo ./api.victorsesma.com` to run the service
+5. Execute `sudo ./api.victorsesma.com` to run the service or use the systemd service
 
 ** Note that the cassandra server should be running **
