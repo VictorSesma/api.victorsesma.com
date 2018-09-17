@@ -2,3 +2,5 @@
 api.victorsesma.com
 # Ignoring config file
 conf.json
+# Ignoring vendor folder
+vendor/*

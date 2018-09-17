@@ -12,6 +12,12 @@
             "Secret": "",
             "ServerAddress": "",
             "Namespace":""
+        },
+        "MySQL":{
+            "UserName":"",
+            "Password":"",
+            "ServerAddress":"",
+            "DbName": ""
         }
     }
 }
