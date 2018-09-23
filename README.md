@@ -7,7 +7,26 @@ This is the API end point for the [VictorSesma.com](https://victorsesma.com) [Re
 1. Install Golang (for example: `snap install --classic go`)
 2. Clone the repository (for example: `git clone git@github.com:leviatan89/api.victorsesma.com.git`)
 3. Make a copy and configure conf.json
-4. Run `go build`
-5. Execute `sudo ./api.victorsesma.com` to run the service or use the systemd service
+4. Run the migrate comand. Something like:
+´migrate -source file:///home/user/go/src/github.com/leviatan89/api.victorsesma.com/migrations -database mysql://"user:password@tcp(dbserver.example:3306)/dbname" up 2`
+5. Run `go install`
+6. Create the following Unit file:
 
-** Note that the cassandra server should be running **
+```
+[Unit]
+Description= instance to serve apiVictorSesma
+After=network.target
+
+[Service]
+Environment=GOPATH=/home/leviatan89/go
+User=root
+Group=www-data
+
+ExecStart=/home/leviatan89/go/bin/api.victorsesma.com
+
+[Install]
+WantedBy=multi-user.target
+
+** Note that the msyql server should be running **
+```
+7. sudo systemctl enable apiVictorSesma
