@@ -29,4 +29,4 @@ WantedBy=multi-user.target
 
 ** Note that the msyql server should be running **
 ```
-7. sudo systemctl enable apiVictorSesma
+7. Run ´sudo systemctl enable apiVictorSesma´
