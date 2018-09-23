@@ -14,7 +14,8 @@ import (
 // var sessionCassandra, errCassandra = connectToCassandra()
 
 func configuration() types.Configuration {
-	file, _ := os.Open("../src/github.com/leviatan89/api.victorsesma.com/conf.json")
+	confPath := os.Getenv("GOPATH") + "/src/github.com/leviatan89/api.victorsesma.com/conf.json"
+	file, _ := os.Open(confPath)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	configuration := types.Configuration{}
