@@ -26,7 +26,7 @@ ExecStart=/home/leviatan89/go/bin/api.victorsesma.com
 
 [Install]
 WantedBy=multi-user.target
-
-** Note that the msyql server should be running **
 ```
-7. Run ´sudo systemctl enable apiVictorSesma´
+7. Run `sudo systemctl enable apiVictorSesma`
+
+** Note that the msyql server should be running as well **
