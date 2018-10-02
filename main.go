@@ -15,13 +15,14 @@ import (
 
 func configuration() types.Configuration {
 	confPath := os.Getenv("GOPATH") + "/src/github.com/leviatan89/api.victorsesma.com/conf.json"
+	// confPath := "/home/leviatan89/go" + "/src/github.com/leviatan89/api.victorsesma.com/conf.json"
 	file, _ := os.Open(confPath)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	configuration := types.Configuration{}
 	err := decoder.Decode(&configuration)
 	if err != nil {
-		fmt.Println("error:", err)
+		log.Println("error:", err)
 	}
 	// fmt.Println(configuration)
 	// Adding semicolons
@@ -46,16 +47,8 @@ func configuration() types.Configuration {
 // 	return session, err
 // }
 
-func blogpost() string {
-	return "blogpost :)"
-}
-
 func indeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "The API is up and running. Visit https://victorsesma.com/ from the browser.")
-}
-
-func blogHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "yeah")
 }
 
 func redirect(w http.ResponseWriter, req *http.Request) {

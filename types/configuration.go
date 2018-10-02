@@ -1,5 +1,7 @@
 package types
 
+import "github.com/go-sql-driver/mysql"
+
 // Configuration holds the app configuration file
 type Configuration struct {
 	APISecret string `json:"ApiSecret"`
@@ -34,4 +36,12 @@ type LifeEvent struct {
 	Name        string
 	Summary     string
 	Description string
+}
+
+//BlogPost Stores One Blog Post
+type BlogPost struct {
+	PostID      int            `json:"postID"`
+	PublishedOn mysql.NullTime `json:"publishedOn"`
+	PostTitle   string         `json:"postTitle"`
+	PostContent string         `json:"postContent"`
 }

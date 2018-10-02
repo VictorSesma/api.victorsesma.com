@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"github.com/leviatan89/api.victorsesma.com/types"
 )
 
-func cvHandler(w http.ResponseWriter, r *http.Request) {
+func blogHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	configuration := configuration()
 	conection := configuration.Database.MySQL.UserName + ":" + configuration.Database.MySQL.Password + "@" + configuration.Database.MySQL.ServerAddress + "/" + configuration.Database.MySQL.DbName
@@ -31,10 +31,10 @@ func cvHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare statement for reading data
 	query := `
-		SELECT description, end_date, name, show_order, start_date, summary
-		FROM curriculum_vitae
-		WHERE section_type = 'work_experience'
-		ORDER BY show_order;
+		SELECT postID, publishedOn, postTitle, postContent
+		FROM blog
+		WHERE publishedOn IS NOT NULL
+		ORDER BY publishedOn DESC;
 	`
 	rows, err := db.Query(query)
 	if err != nil {
@@ -43,22 +43,25 @@ func cvHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var name, summary, description, showOrder string
-	var startDate, endDate []uint8
+	var postID int
+	var publishedOn mysql.NullTime
+	var postTitle, postContent string
+
 	var counter = 1
-	LifeEvents := make(map[string]types.LifeEvent)
+	BlogPosts := make(map[string]types.BlogPost)
 	for rows.Next() {
-		err := rows.Scan(&description, &endDate, &name, &showOrder, &startDate, &summary)
+		err := rows.Scan(&postID, &publishedOn, &postTitle, &postContent)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		LifeEvents[strconv.Itoa(counter)] = types.LifeEvent{showOrder, string(startDate), string(endDate), name, summary, description}
+		BlogPosts[strconv.Itoa(counter)] = types.BlogPost{postID, publishedOn, postTitle, postContent}
 		counter++
 	}
-	fmt.Printf("cvHandler DB query iterations took %s", time.Since(start))
-	js, err := json.Marshal(LifeEvents)
+	fmt.Printf("blogHanler DB query iterations took %s", time.Since(start))
+	js, err := json.Marshal(BlogPosts)
 	if err != nil {
+		log.Println("------Error!", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
