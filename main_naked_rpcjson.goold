@@ -1,0 +1,149 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net"
+	"net/http"
+	"net/rpc"
+	"net/rpc/jsonrpc"
+	"os"
+
+	"github.com/leviatan89/api.victorsesma.com/types"
+)
+
+func configuration() types.Configuration {
+	confPath := os.Getenv("GOPATH") + "/src/github.com/leviatan89/api.victorsesma.com/conf.json"
+	// confPath := "/home/leviatan89/go" + "/src/github.com/leviatan89/api.victorsesma.com/conf.json"
+	file, _ := os.Open(confPath)
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	cnf := types.Configuration{}
+	err := decoder.Decode(&cnf)
+	if err != nil {
+		log.Println("error:", err)
+	}
+	// fmt.Println(cnf)
+	// Adding semicolons
+	cnf.HTTPPort = ":" + cnf.HTTPPort
+	cnf.HTTPSPort = ":" + cnf.HTTPSPort
+	return cnf
+}
+
+func indeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "The API is up and running. Visit https://victorsesma.com/ from the browser.")
+}
+
+// func redirect(w http.ResponseWriter, req *http.Request) {
+// 	// remove/add not default ports from req.Host
+// 	cnf := configuration()
+// 	target := "https://"
+// 	if cnf.HTTPSPort != "443" {
+// 		target = target + strings.Replace(req.Host, cnf.HTTPPort, cnf.HTTPSPort, -1)
+// 	}
+// 	target = target + req.URL.Path
+// 	if len(req.URL.RawQuery) > 0 {
+// 		target += "?" + req.URL.RawQuery
+// 	}
+// 	http.Redirect(w, req, target,
+// 		// see @andreiavrammsd comment: often 307 > 301
+// 		http.StatusTemporaryRedirect)
+// }
+
+type Test string
+
+func (t *Test) Test1(args types.TestCall, reply *types.TestCall) error {
+	log.Println("---going to show args", args)
+	// print := "This is the printing"
+	// reply = &map[string]interface{}{"test": "hey test"}
+	reply.Message = args.Message
+	return nil
+}
+
+// type JSONRPCServer struct {
+// 	*rpc.Server
+// }
+
+// func NewJSONRPCServer() *JSONRPCServer {
+// 	return &JSONRPCServer{rpc.NewServer()}
+// }
+
+// func (s *JSONRPCServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+// 	log.Println("got a request")
+// 	conn, _, err := w.(http.Hijacker).Hijack()
+// 	if err != nil {
+// 		log.Println("--------this error")
+// 		log.Print("rpc hijacking ", req.RemoteAddr, ": ", err.Error())
+// 		return
+// 	}
+// 	log.Println("after the error")
+// 	io.WriteString(conn, "HTTP/1.0 200 Connected to Go JSON-RPC\n\n")
+// 	log.Println("after printing")
+// 	codec := jsonrpc.NewServerCodec(conn)
+// 	log.Println("after codec")
+// 	log.Println("ServeCodec")
+// 	s.Server.ServeCodec(codec)
+// 	log.Println("finished serving request")
+// }
+
+type HttpConn struct {
+	in  io.Reader
+	out io.Writer
+}
+
+func (c *HttpConn) Read(p []byte) (n int, err error)  { return c.in.Read(p) }
+func (c *HttpConn) Write(d []byte) (n int, err error) { return c.out.Write(d) }
+func (c *HttpConn) Close() error                      { return nil }
+
+func StartServer() {
+	test := new(Test)
+	rpc.Register(test)
+
+	l, err := net.Listen("tcp", fmt.Sprintf(":%v", 80))
+	if err != nil {
+		log.Fatal(fmt.Sprintf("Unable to listen on given port: %s", err))
+	}
+
+	http.Serve(l, http.HandlerFunc(httpHandler))
+}
+
+func httpHandler(w http.ResponseWriter, r *http.Request) {
+
+	// rpcServer.RegisterCodec(json.NewCodec(), "application/json")
+	// rpcServer.RegisterCodec(json.NewCodec(), "application/json;charset=UTF-8")
+	serverCodec := jsonrpc.NewServerCodec(&HttpConn{in: r.Body, out: w})
+	err := rpc.ServeRequest(serverCodec)
+	if err != nil {
+		log.Printf("Error while serving JSON request: %v", err)
+		http.Error(w, "Error while serving JSON request, details have been logged.", 500)
+		return
+	}
+}
+
+func main() {
+	log.Println("------here :)")
+	log.Println("------here :)")
+	log.Println("------here :)")
+	log.Println("------here :)")
+	log.Println("------here :)")
+
+	StartServer()
+
+	// s := NewJSONRPCServer()
+	// test := new(Test)
+	// s.Register(test)
+	// http.Handle("/rpc", s)
+	// http.ListenAndServe(":80", nil)
+
+	// http.HandleFunc("/", indeHandler)
+	// http.HandleFunc("/cv/", cvHandler)
+	// http.HandleFunc("/blog/", blogHandler)
+	// Configuration := configuration()
+	// go http.ListenAndServe(Configuration.HTTPPort, http.HandlerFunc(redirect))
+	// err := http.ListenAndServeTLS(Configuration.HTTPSPort, Configuration.Fullchain, Configuration.Privkey, nil)
+	// if err != nil {
+	// 	log.Fatal("ListenAndServe: ", err)
+	// }
+}
