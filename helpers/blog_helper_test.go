@@ -1,4 +1,4 @@
-package helpers
+package helpers_test
 
 import (
 	"testing"
@@ -6,6 +6,7 @@ import (
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-sql-driver/mysql"
+	"github.com/leviatan89/api.victorsesma.com/helpers"
 	"github.com/leviatan89/api.victorsesma.com/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,7 +27,7 @@ func TestGetAll(t *testing.T) {
 
 	mock.ExpectQuery("^SELECT (.+) FROM blog (.+)$").WillReturnRows(rows)
 
-	result, err := GetBlogPosts(db)
+	result, err := helpers.GetBlogPosts(db)
 	assert.NoError(t, err)
 
 	// mysql time when nil

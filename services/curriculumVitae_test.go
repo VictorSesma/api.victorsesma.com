@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"errors"
@@ -10,13 +10,14 @@ import (
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/gorilla/rpc/v2"
 	"github.com/gorilla/rpc/v2/json2"
+	"github.com/leviatan89/api.victorsesma.com/services"
 	"github.com/leviatan89/api.victorsesma.com/types"
 	"github.com/stretchr/testify/assert"
 )
 
-func startServersCV(serverRunning chan bool) error {
+func startServersCV(serverCVRunning chan bool) error {
 	// Mocking DB
-	dbcv, mock, err := sqlmock.New()
+	dbcv, mockcv, err := sqlmock.New()
 	if err != nil {
 		log.Println("error:", err)
 		return err
@@ -25,33 +26,35 @@ func startServersCV(serverRunning chan bool) error {
 
 	rows := sqlmock.NewRows([]string{"description", "end_date", "name", "show_order", "start_date", "summary"}).
 		AddRow("Volunteer in AEGEE", "2019-08-08 08:08:08", "Aegee coordinator", "1", "2019-08-08 08:08:08", "summary cool")
-
-	mock.ExpectQuery("^SELECT (.+) FROM curriculum_vitae (.+)$").WillReturnRows(rows)
+	mockcv.ExpectQuery("^SELECT (.+) FROM curriculum_vitae (.+)$").WillReturnRows(rows)
 
 	// Mocking RPC Server
 	s := rpc.NewServer()
 	s.RegisterCodec(json2.NewCodec(), "application/json")
-	cv := new(CurriculumVitae)
+	cv := new(services.CurriculumVitae)
 	cv.DB = dbcv
 	s.RegisterService(cv, "")
 	http.Handle("/rpcCV", s)
 	// time.Sleep(10 * time.Second)
-	serverRunning <- true
-	http.ListenAndServe(":8080", nil)
+	serverCVRunning <- true
+
+	http.ListenAndServe(":8081", nil)
 
 	return nil
 }
 
 func TestGetAllCV(t *testing.T) {
-	serverRunning := make(chan bool)
-	go startServersCV(serverRunning)
-	if channel := <-serverRunning; channel == true {
-		log.Println("Json RPC test server running ...")
+
+	serverCVRunning := make(chan bool)
+	go startServersCV(serverCVRunning)
+	if channelCV := <-serverCVRunning; channelCV == true {
+		log.Println("Json RPC test server running this ...")
 	}
 
 	params := string(`{"jsonrpc":"2.0","id":123,"method":"CurriculumVitae.GetAll"}`)
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", "http://localhost:8080/rpcCV", strings.NewReader(params))
+	req, err := http.NewRequest("POST", "http://localhost:8081/rpcCV", strings.NewReader(params))
+
 	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 	res, err := client.Do(req)

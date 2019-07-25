@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"errors"
@@ -12,6 +12,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/rpc/v2"
 	"github.com/gorilla/rpc/v2/json2"
+	"github.com/leviatan89/api.victorsesma.com/services"
 	"github.com/leviatan89/api.victorsesma.com/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -39,7 +40,7 @@ func startServers(serverRunning chan bool) error {
 	// Mocking RPC Server
 	s := rpc.NewServer()
 	s.RegisterCodec(json2.NewCodec(), "application/json")
-	b := new(Blog)
+	b := new(services.Blog)
 	b.DB = db
 	s.RegisterService(b, "")
 	http.Handle("/rpc", s)
@@ -90,7 +91,5 @@ func TestGetAll(t *testing.T) {
 		},
 	}
 
-	// log.Println("-----reply is...")
-	// spew.Dump(reply)
 	assert.Equal(t, expected, *reply)
 }

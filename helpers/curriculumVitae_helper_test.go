@@ -1,9 +1,10 @@
-package helpers
+package helpers_test
 
 import (
 	"testing"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
+	"github.com/leviatan89/api.victorsesma.com/helpers"
 	"github.com/leviatan89/api.victorsesma.com/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +22,7 @@ func TestGetAllCurriculumVitaes(t *testing.T) {
 
 	mock.ExpectQuery("^SELECT (.+) FROM curriculum_vitae (.+)$").WillReturnRows(rows)
 
-	result, err := GetCurriculumVitae(db)
+	result, err := helpers.GetCurriculumVitae(db)
 	assert.NoError(t, err)
 
 	expected := types.LifeEvents{
